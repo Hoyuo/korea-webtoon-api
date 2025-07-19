@@ -60,12 +60,12 @@ export const getEpisodesByWebtoonId = async (req: Request, res: Response) => {
     // 스크래퍼를 호출하여 에피소드 목록을 가져옵니다.
     const episodes = await scrapeWebtoonEpisodes(String(webtoon.url), webtoon.provider);
 
-    res.json({
+    return res.json({
       items: episodes,
       total: episodes.length,
     });
   } catch (error) {
     console.error(`Error fetching episodes for webtoon id ${req.params.id}:`, error);
-    res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
