@@ -1,46 +1,30 @@
-# syntax = docker/dockerfile:1
+# 공식 Node.js 20 이미지를 기반으로 합니다.
+FROM node:20-bullseye-slim
 
-# Adjust NODE_VERSION as desired
-ARG NODE_VERSION=22.15.0
-FROM node:${NODE_VERSION}-slim AS base
-
-LABEL fly_launch_runtime="Node.js"
-
-# Node.js app lives here
+# 작업 디렉토리를 /app으로 설정합니다.
 WORKDIR /app
 
-# Set production environment
-ENV NODE_ENV="production"
-ARG YARN_VERSION=1.22.21
-RUN npm install -g yarn@$YARN_VERSION --force
+# Puppeteer에 필요한 종속성을 설치합니다.
+RUN apt-get update \
+    && apt-get install -y wget gnupg \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
-
-# Throw-away build stage to reduce size of final image
-FROM base AS build
-
-# Install packages needed to build node modules
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
-
-# Install node modules
+# package.json과 yarn.lock을 복사합니다.
 COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
 
-# Copy application code
+# 의존성을 설치합니다.
+RUN yarn install --frozen-lockfile --production=false
+
+# 애플리케이션 소스 코드를 복사합니다.
 COPY . .
 
+# 애플리케이션을 빌드합니다. (package.json에 "build" 스크립트가 있다고 가정)
+RUN yarn build
 
-# Final stage for app image
-FROM base
-
-# Copy built application
-COPY --from=build /app /app
-
-# Setup sqlite3 on a separate volume
-RUN mkdir -p /data
-VOLUME /data
-
-# Start the server by default, this can be overwritten at runtime
-EXPOSE 3000
-ENV DATABASE_URL="file:///data/sqlite.db"
-CMD [ "yarn", "run", "start" ]
+# 애플리케이션 시작 명령을 설정합니다. (package.json에 "start" 스크립트가 있다고 가정)
+CMD ["yarn", "start"]

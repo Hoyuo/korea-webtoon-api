@@ -13,6 +13,7 @@ const scrapeNaverEpisodes = async (url: string): Promise<Episode[]> => {
   try {
     browser = await puppeteer.launch({
       headless: true, // 백그라운드에서 실행
+      executablePath: '/usr/bin/google-chrome-stable',
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
     const page = await browser.newPage();
@@ -64,6 +65,7 @@ const scrapeKakaoEpisodes = async (url: string): Promise<Episode[]> => {
   try {
     browser = await puppeteer.launch({
       headless: true, // 백그라운드에서 실행
+      executablePath: '/usr/bin/google-chrome-stable',
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
     const page = await browser.newPage();
