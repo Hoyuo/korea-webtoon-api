@@ -7,7 +7,9 @@ import { specs } from './swagger';
 import { putKakao } from './routes/update/kakao';
 import { ROUTES } from './constants';
 import { getHealthCheck } from './routes/health-check';
-import { getWebtoons } from './routes/webtoons';
+import { getWebtoons } from './routes/get-webtoons';
+import { getWebtoonById } from './routes/get-webtoon-by-id';
+import { getEpisodesByWebtoonId } from './routes/get-episodes-by-webtoon-id';
 import cors from 'cors';
 
 const app = express();
@@ -52,6 +54,10 @@ const PORT = process.env.PORT || 3000;
   app.get(ROUTES.HEALTH_CHECK, getHealthCheck);
 
   app.get(ROUTES.GET_WEBTOONS, getWebtoons);
+
+  app.get(ROUTES.GET_WEBTOON_BY_ID, getWebtoonById);
+
+  app.get(ROUTES.GET_EPISODES_BY_WEBTOON_ID, getEpisodesByWebtoonId);
 
   app.get('/', (_, res) => res.redirect(ROUTES.SWAGGER));
 })();
