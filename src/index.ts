@@ -12,7 +12,14 @@ import cors from 'cors';
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: '*', // 모든 도메인 허용
+    methods: ['GET', 'PUT'], // 허용할 HTTP 메소드
+    credentials: true, // 쿠키를 포함한 요청 허용
+    optionsSuccessStatus: 204, // 일부 브라우저에서 204 응답을 처리할 수 있도록 설정
+  }),
+);
 
 const PORT = process.env.PORT || 3000;
 
